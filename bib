@@ -1,0 +1,73 @@
+#!/bin/bash
+Tmp=/tmp/BIB$$
+trap 'exit 0' INT HUP QUIT TERM ALRM USR1
+trap 'rm -f "$Tmp"' EXIT
+rm -f "$Tmp"  >/dev/null 2>&1
+
+DBFILE="bib.db"
+touch $DBFILE
+
+while getopts "n:v:gplri" arg
+do
+  case $arg in
+     n) NAME=$OPTARG
+        ;;
+     v) VALUE=$OPTARG
+        ;;
+     g) 
+        cat "$DBFILE" | gawk -v tmp=$Tmp -v dbfile="$DBFILE" -v n="$NAME" -v v="$VALUE" -F, ' {value[$1] = $2;}
+        END {
+            sz ="NULL"; if (n in value) sz=value[n]; print sz;
+        }'
+        ;;
+     p) 
+        cat "$DBFILE" | gawk -v dbfile="$DBFILE" -v n="$NAME" -v v="$VALUE" -F, ' {value[$1] = $2;}
+        END {
+            value[n]=v;
+            OFS=","; system("rm -rf " dbfile); 
+            for (name in value) {
+                print name,value[name] >> dbfile;
+                close(dbfile); 
+            }
+        }'
+        ;;
+     l) 
+        cat "$DBFILE" | gawk -v dbfile="$DBFILE" -v n="$NAME" -v v="$VALUE" -F, ' {value[$1] = $2;}
+        END {
+            OFS=","; for (name in value) { print name,value[name];  }
+        }'
+        ;;
+     r) 
+        cat "$DBFILE" | gawk -v dbfile="$DBFILE" -v n="$NAME" -v v="$VALUE" -F, ' {value[$1] = $2;}
+        END {
+            value[n]=v;
+            OFS=","; system("rm -rf " dbfile); for (name in value) { if (n!=name) print name,value[name] >> dbfile; close(dbfile); }
+        }'
+        ;;
+     i) 
+        cat "$DBFILE" | gawk -v dbfile="$DBFILE" -v n="$NAME" -v v="$VALUE" -F, '
+        END {
+            system("rm -rf " dbfile); 
+        }'
+        ;;
+
+     *) exit 0
+        ;;
+  esac
+done
+shift $(($OPTIND - 1))
+
+programname=$0
+function usage {
+    echo "usage: $programname [-abch] [-f infile] [-o outfile]"
+    echo "  -a      turn on feature a"
+    echo "  -b      turn on feature b"
+    echo "  -c      turn on feature c"
+    echo "  -h      display help"
+    echo "  -f infile   specify input file infile"
+    echo "  -o outfile  specify output file outfile"
+    exit 1
+}
+
+
+
