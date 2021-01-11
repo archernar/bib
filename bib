@@ -1,7 +1,6 @@
 #!/bin/bash
 Tmp=/tmp/BIB$$
-trap 'exit 0' INT HUP QUIT TERM ALRM USR1
-trap 'rm -f "$Tmp"' EXIT
+trap "rm -f $Tmp" EXIT
 rm -f "$Tmp"  >/dev/null 2>&1
 
 programname=bib
