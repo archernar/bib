@@ -4,10 +4,24 @@ trap 'exit 0' INT HUP QUIT TERM ALRM USR1
 trap 'rm -f "$Tmp"' EXIT
 rm -f "$Tmp"  >/dev/null 2>&1
 
+programname=bib
+function usage {
+    echo ""
+    echo "usage: $programname [-pgrlih] [-n name] [-v value]"
+    echo "  -p             put a name/value pair"
+    echo "  -g             get the value of a name"
+    echo "  -r             remove a name/value pair"
+    echo "  -l             list all name/value pairs"
+    echo "  -i             initial the name/pair dataset (empty it)"
+    echo "  -n <name>      specify a name"
+    echo "  -v <value>     specify a value"
+    echo "  -h             display help"
+    exit 1
+}
 DBFILE="bib.db"
 touch $DBFILE
 
-while getopts "n:v:gplri" arg
+while getopts "n:v:gplrih" arg
 do
   case $arg in
      n) NAME=$OPTARG
@@ -50,24 +64,14 @@ do
             system("rm -rf " dbfile); 
         }'
         ;;
-
+     h) usage
+        ;;
      *) exit 0
         ;;
   esac
 done
 shift $(($OPTIND - 1))
 
-programname=$0
-function usage {
-    echo "usage: $programname [-abch] [-f infile] [-o outfile]"
-    echo "  -a      turn on feature a"
-    echo "  -b      turn on feature b"
-    echo "  -c      turn on feature c"
-    echo "  -h      display help"
-    echo "  -f infile   specify input file infile"
-    echo "  -o outfile  specify output file outfile"
-    exit 1
-}
 
 
 
